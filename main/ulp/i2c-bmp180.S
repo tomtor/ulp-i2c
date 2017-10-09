@@ -61,13 +61,17 @@ entry:
 	move r2,BMP180_REG_CONTROL
 	psr
 	jump i2c_write_byte
+	jumpr fail,1,ge
 
 	move r2,BMP180_COMMAND_TEMPERATURE
 	psr
 	jump i2c_write_byte
+	jumpr fail,1,ge
 
 	psr
 	jump i2c_stop_cond
+
+	status 3
 
 	move r2,5
 	psr
@@ -79,30 +83,47 @@ entry:
 	move r2,WRITE
 	psr
 	jump i2c_write_byte
+	jumpr fail,1,ge
 
 	move r2,BMP180_REG_RESULT
 	psr
 	jump i2c_write_byte
+	jumpr fail,1,ge
 
 	psr
 	jump i2c_start_cond
 
+	status 4
+
 	move r2,READ
 	psr
 	jump i2c_write_byte
+	jumpr fail,1,ge
+
+	status 5
 
 	move r2,0
 	psr
 	jump i2c_read_byte
+	push r0
 
 	move r2,1 // last byte
 	psr
 	jump i2c_read_byte
+	push r0
 
 	psr
 	jump i2c_stop_cond
 
+	pop r0
+	pop r2 // first byte
+	lsh r2,r2,8
+	or r2,r2,r0
+	move r1,status
+	st r2,r1,0
+
 	wait 100
+
 
 fail:
 wake_up:

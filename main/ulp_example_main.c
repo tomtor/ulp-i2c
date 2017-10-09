@@ -18,6 +18,10 @@
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
 #include "esp32/ulp.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "sdkconfig.h"
+
 #include "ulp_main.h"
 
 extern const uint8_t ulp_main_bin_start[] asm("_binary_ulp_main_bin_start");
@@ -53,14 +57,14 @@ static void init_ulp_program()
     REG_SET_FIELD(SENS_ULP_CP_SLEEP_CYC0_REG, SENS_SLEEP_CYCLES_S0, 309500);
 
     /* Start the program */
-    err = ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t));
-    ESP_ERROR_CHECK(err);
+//    err = ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t));
+//    ESP_ERROR_CHECK(err);
 
 }
 
 static void print_status()
 {
-  printf("status: %d\n", ulp_status);
+  printf("status: %d Address: %x\n", ulp_status & 0xFFFF, ulp_status >> 21);
 }
 
 void app_main()
@@ -81,5 +85,6 @@ void app_main()
     ESP_ERROR_CHECK( esp_sleep_enable_ulp_wakeup() );
     //esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
 
-	esp_deep_sleep_start();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    esp_deep_sleep_start();
 }

@@ -64,7 +64,7 @@ i2c_started:
 i2c_start_cond:
 	move r2,i2c_started
 	ld r0,r2,0
-	jumpr not_started,1,ge
+	jumpr not_started,1,lt
 // if started, do a restart condition
 // set SDA to 1
 	set_SDA
@@ -103,6 +103,10 @@ clock_stretch_stop:
 	jumpr clock_stretch_stop,1,lt
 
 // Stop bit setup time, minimum 4us
+	I2C_delay
+
+// SCL is high, set SDA from 0 to 1
+	set_SDA
 	I2C_delay
 	// if (read_SDA() == 0) {
  	//		arbitration_lost();
