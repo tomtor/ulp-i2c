@@ -32,6 +32,9 @@
 	.global status
 status:	.long 0
 
+	.global	counter
+counter: .long 0
+
 	.global stack
 stack:
 	.skip 100
@@ -44,6 +47,14 @@ stackEnd:
 	.global entry
 entry:
 	move r3,stackEnd
+
+	// Read the BMP-180 every 4 timer cycles:
+	move r1,counter
+	ld r0,r1,0
+	add r0,r0,1
+	st r0,r1,0 // increment counter
+	and r0,r0,0x3
+	jumpr waitNext,1,ge
 
 	status 1
 
@@ -129,6 +140,7 @@ fail:
 wake_up:
 	/* Wake up the SoC, end program */
 	wake
+waitNext:
 	halt
 
 waitMs:

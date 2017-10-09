@@ -29,7 +29,7 @@ i2c_started:
 .global i2c_read_byte
 
 .macro I2C_delay
-	wait 38 // minimal 4.7us
+	wait 10 // 38 // minimal 4.7us
 .endm
 
 .macro read_SCL // Return current level of SCL line, 0 or 1

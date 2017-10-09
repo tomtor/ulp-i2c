@@ -1,4 +1,4 @@
-/* ULP Example
+/* ULP I2C bit bang BMP-180 Example
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -51,20 +51,20 @@ static void init_ulp_program()
             (ulp_main_bin_end - ulp_main_bin_start) / sizeof(uint32_t));
     ESP_ERROR_CHECK(err);
 
-    /* Set ULP wake up period to T = 2000ms (309500 cycles of RTC_SLOW_CLK clock).
+    /* Set ULP wake up period to T = 1000ms
      * Minimum pulse width has to be T * (ulp_debounce_counter + 1) = 80ms.
      */
-    REG_SET_FIELD(SENS_ULP_CP_SLEEP_CYC0_REG, SENS_SLEEP_CYCLES_S0, 309500);
+    REG_SET_FIELD(SENS_ULP_CP_SLEEP_CYC0_REG, SENS_SLEEP_CYCLES_S0, 150000);
 
     /* Start the program */
-//    err = ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t));
-//    ESP_ERROR_CHECK(err);
+    err = ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t));
+    ESP_ERROR_CHECK(err);
 
 }
 
 static void print_status()
 {
-  printf("status: %d Address: %x\n", ulp_status & 0xFFFF, ulp_status >> 21);
+  printf("status: %d Address: 0x%04x counter: %d\n", ulp_status & 0xFFFF, ulp_status >> 19, ulp_counter & 0xFFFF);
 }
 
 void app_main()
@@ -81,10 +81,9 @@ void app_main()
 
     printf("Entering deep sleep\n\n");
     /* Start the ULP program */
-    ESP_ERROR_CHECK( ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t)));
+    //ESP_ERROR_CHECK( ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t)));
     ESP_ERROR_CHECK( esp_sleep_enable_ulp_wakeup() );
     //esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //vTaskDelay(1000 / portTICK_PERIOD_MS);
     esp_deep_sleep_start();
 }
