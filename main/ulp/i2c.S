@@ -19,6 +19,9 @@
 i2c_started:
 	.long 0
 
+i2c_didInit:
+	.long 0
+
 .text
 
 .global i2c_start_cond
@@ -45,7 +48,6 @@ i2c_started:
 .endm
 
 .macro clear_SCL // Actively drive SCL signal low
-	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 9, 1, 0)
 	// Output mode
 	WRITE_RTC_REG(RTC_GPIO_ENABLE_W1TS_REG, RTC_GPIO_ENABLE_W1TS_S + 9, 1, 1)
 .endm
@@ -55,13 +57,21 @@ i2c_started:
 .endm
 
 .macro clear_SDA // Actively drive SDA signal low
-	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 8, 1, 0)
 	// Output mode
 	WRITE_RTC_REG(RTC_GPIO_ENABLE_W1TS_REG, RTC_GPIO_ENABLE_W1TS_S + 8, 1, 1)
 .endm
 
 
 i2c_start_cond:
+	move r1,i2c_didInit
+	ld r0,r1,0
+	jumpr didInit,1,ge
+	move r0,1
+	st r0,r1,0
+// set GPIO to pull low when activated
+	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 9, 1, 0)
+	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 8, 1, 0)
+didInit:
 	move r2,i2c_started
 	ld r0,r2,0
 	jumpr not_started,1,lt
