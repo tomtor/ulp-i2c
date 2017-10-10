@@ -9,8 +9,6 @@
 #include "stack.S"
 
 .set BMP180_ADDR,0x77 // 7-bit address
-.set WRITE,((BMP180_ADDR << 1) | 0)
-.set READ,((BMP180_ADDR << 1) | 1)
 
 .set BMP180_REG_CONTROL,0xF4
 .set BMP180_REG_RESULT,0xF6
@@ -23,8 +21,12 @@
 
 /* Define variables, which go into .bss section (zero-initialized data) */
 	.bss
-	.global status
-status:	.long 0
+
+	.global temp
+temp:	.long 0
+	.global	pressure, pressure2
+pressure: .long 0
+pressure2: .long 0
 
 	.global	counter
 counter: .long 0
@@ -35,6 +37,22 @@ stack:
 	.global stackEnd
 stackEnd:
 	.long 0
+
+	.global ac1, ac2, ac3, ac4, ac5, ac6, b1, b2, mb, mc, md
+
+ac1: .long 0
+ac2: .long 0
+ac3: .long 0
+ac4: .long 0
+ac5: .long 0
+ac6: .long 0
+
+b1: .long 0
+b2: .long 0
+
+mb: .long 0
+mc: .long 0
+md: .long 0
 
 	/* Code goes into .text section */
 	.text
@@ -47,6 +65,8 @@ entry:
 	ld r0,r1,0
 	add r0,r0,1
 	st r0,r1,0 // increment counter
+	jumpr init,2,lt
+didInit:
 	and r0,r0,0x3
 	jumpr waitNext,1,ge
 
@@ -78,13 +98,57 @@ entry:
 	move r1,r0 // save result
 	move r0,r2 // test for error
 	jumpr fail,1,ge
-	move r2,status // store result
+	move r2,temp // store result
+	st r1,r2,0
+
+	// Read raw pressure
+	move r1,BMP180_ADDR
+	push r1
+	move r1,BMP180_REG_CONTROL
+	push r1
+	move r1,BMP180_COMMAND_PRESSURE3
+	push r1
+	psr
+	jump write8
+	add r3,r3,3 // remove 3 arguments from stack
+	move r0,r2 // test for error in r2
+	jumpr fail,1,ge
+
+	// Wait 26ms for sensor computation
+	move r2,26
+	psr
+	jump waitMs
+
+	move r1,BMP180_ADDR
+	push r1
+	move r1,BMP180_REG_RESULT
+	push r1
+	psr
+	jump read16
+	add r3,r3,2 // remove call parameters from stack
+	move r1,r0 // save result
+	move r0,r2 // test for error
+	jumpr fail,1,ge
+	move r2,pressure // store result
+	st r1,r2,0
+
+	move r1,BMP180_ADDR
+	push r1
+	move r1,(BMP180_REG_RESULT+2)
+	push r1
+	psr
+	jump read8
+	add r3,r3,2 // remove call parameters from stack
+	move r1,r0 // save result
+	move r0,r2 // test for error
+	jumpr fail,1,ge
+	move r2,pressure2 // store result
 	st r1,r2,0
 
 	jump wake_up
 
 fail:
-	move r1,status
+	move r1,temp
 	move r0,0 // 0 signals error
 	st r0,r1,0
 
@@ -103,3 +167,99 @@ waitMs:
 	jump waitMs
 doneWaitMs:
 	ret
+
+#define BMP085_CAL_AC1           0xAA
+#define BMP085_CAL_AC2           0xAC
+#define BMP085_CAL_AC3           0xAE
+#define BMP085_CAL_AC4           0xB0
+#define BMP085_CAL_AC5           0xB2
+#define BMP085_CAL_AC6           0xB4
+#define BMP085_CAL_B1            0xB6
+#define BMP085_CAL_B2            0xB8
+#define BMP085_CAL_MB            0xBA
+#define BMP085_CAL_MC            0xBC
+#define BMP085_CAL_MD            0xBE
+
+// Read calibration data
+init:
+	move r1,BMP180_ADDR
+	push r1
+	move r1,BMP085_CAL_AC1
+	push r1
+	psr
+	jump read16
+	move r1,ac1
+	st r0,r1,0
+
+	move r1,BMP085_CAL_AC2
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,ac2
+	st r0,r1,0
+
+	move r1,BMP085_CAL_AC3
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,ac3
+	st r0,r1,0
+
+	move r1,BMP085_CAL_AC4
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,ac4
+	st r0,r1,0
+
+	move r1,BMP085_CAL_AC5
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,ac5
+	st r0,r1,0
+
+	move r1,BMP085_CAL_AC6
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,ac6
+	st r0,r1,0
+
+	move r1,BMP085_CAL_B1
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,b1
+	st r0,r1,0
+
+	move r1,BMP085_CAL_B2
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,b2
+	st r0,r1,0
+
+	move r1,BMP085_CAL_MB
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,mb
+	st r0,r1,0
+
+	move r1,BMP085_CAL_MC
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,mc
+	st r0,r1,0
+
+	move r1,BMP085_CAL_MD
+	st r1,r3,4
+	psr
+	jump read16
+	move r1,md
+	st r0,r1,0
+
+	add r3,r3,2
+	jump didInit
