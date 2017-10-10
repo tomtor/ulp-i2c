@@ -10,6 +10,7 @@ ULP_APP_NAME ?= ulp_$(COMPONENT_NAME)
 #    which should not be added to COMPONENT_SRCDIRS.
 ULP_S_SOURCES = $(addprefix $(COMPONENT_PATH)/ulp/, \
 	i2c-bmp180.S \
+	i2c-util.S \
 	i2c.S \
 	)
 #

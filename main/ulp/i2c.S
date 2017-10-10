@@ -129,7 +129,7 @@ clock_stretch_stop:
  	ret
 
 
- // Write a bit to I2C bus
+// Write a bit to I2C bus
 i2c_write_bit:
 	jumpr bit0,1,lt
 	set_SDA

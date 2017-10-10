@@ -21,12 +21,6 @@
 .set BMP180_COMMAND_PRESSURE2,0xB4
 .set BMP180_COMMAND_PRESSURE3,0xF4
 
-.macro status s
-	move r1,status
-	move r0,\s
-	st r0,r1,0
-.endm
-
 /* Define variables, which go into .bss section (zero-initialized data) */
 	.bss
 	.global status
@@ -56,93 +50,52 @@ entry:
 	and r0,r0,0x3
 	jumpr waitNext,1,ge
 
-	status 1
-
-	wait 100
+	move r1,BMP180_ADDR
+	push r1
+	move r1,BMP180_REG_CONTROL
+	push r1
+	move r1,BMP180_COMMAND_TEMPERATURE
+	push r1
 	psr
-	jump i2c_start_cond
-
-	move r2,WRITE
-	psr
-	jump i2c_write_byte
+	jump write8
+	add r3,r3,3 // remove 3 arguments from stack
+	move r0,r2 // test for error in r2
 	jumpr fail,1,ge
 
-	status 2
-
-	move r2,BMP180_REG_CONTROL
-	psr
-	jump i2c_write_byte
-	jumpr fail,1,ge
-
-	move r2,BMP180_COMMAND_TEMPERATURE
-	psr
-	jump i2c_write_byte
-	jumpr fail,1,ge
-
-	psr
-	jump i2c_stop_cond
-
-	status 3
-
+	// Wait 5ms for sensor computation
 	move r2,5
 	psr
 	jump waitMs
 
+	// Read 16 bit result
+	move r1,BMP180_ADDR
+	push r1
+	move r1,BMP180_REG_RESULT
+	push r1
 	psr
-	jump i2c_start_cond
-
-	move r2,WRITE
-	psr
-	jump i2c_write_byte
+	jump read16
+	add r3,r3,2 // remove call parameters from stack
+	move r1,r0 // save result
+	move r0,r2 // test for error
 	jumpr fail,1,ge
+	move r2,status // store result
+	st r1,r2,0
 
-	move r2,BMP180_REG_RESULT
-	psr
-	jump i2c_write_byte
-	jumpr fail,1,ge
-
-	psr
-	jump i2c_start_cond
-
-	status 4
-
-	move r2,READ
-	psr
-	jump i2c_write_byte
-	jumpr fail,1,ge
-
-	status 5
-
-	move r2,0
-	psr
-	jump i2c_read_byte
-	push r0
-
-	move r2,1 // last byte
-	psr
-	jump i2c_read_byte
-	push r0
-
-	psr
-	jump i2c_stop_cond
-
-	pop r0
-	pop r2 // first byte
-	lsh r2,r2,8
-	or r2,r2,r0
-	move r1,status
-	st r2,r1,0
-
-	wait 100
-
+	jump wake_up
 
 fail:
+	move r1,status
+	move r0,0 // 0 signals error
+	st r0,r1,0
+
 wake_up:
 	/* Wake up the SoC, end program */
 	wake
+
 waitNext:
 	halt
 
+// Wait for r2 milliseconds
 waitMs:
 	wait 8000
 	sub r2,r2,1
