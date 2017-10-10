@@ -39,15 +39,12 @@ static void init_ulp_program()
 {
     rtc_gpio_init(gpio_led);
     rtc_gpio_set_direction(gpio_led, RTC_GPIO_MODE_OUTPUT_ONLY);
-    //rtc_gpio_set_drive_capability(gpio_led, GPIO_DRIVE_CAP_DEFAULT);
-    //rtc_gpio_hold_dis(gpio_num);
 
     rtc_gpio_init(gpio_scl);
     rtc_gpio_set_direction(gpio_scl, RTC_GPIO_MODE_INPUT_ONLY);
     rtc_gpio_init(gpio_sda);
     rtc_gpio_set_direction(gpio_sda, RTC_GPIO_MODE_INPUT_ONLY);
 
-    //rtc_gpio_pullup_en(gpio_dht);
     esp_err_t err = ulp_load_binary(0, ulp_main_bin_start,
             (ulp_main_bin_end - ulp_main_bin_start) / sizeof(uint32_t));
     ESP_ERROR_CHECK(err);
@@ -152,10 +149,8 @@ void app_main()
     }
 
     printf("Entering deep sleep\n\n");
-    /* Start the ULP program */
-    //ESP_ERROR_CHECK( ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t)));
+
     ESP_ERROR_CHECK( esp_sleep_enable_ulp_wakeup() );
-    //esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-    //vTaskDelay(1000 / portTICK_PERIOD_MS);
+
     esp_deep_sleep_start();
 }
