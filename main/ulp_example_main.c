@@ -97,7 +97,7 @@ static void print_status()
     printf("rawT: %d Address: 0x%04x counter: %d\n", ulp_temp & 0xFFFF, ulp_temp >> 19, ulp_counter & 0xFFFF);
     printf("rawP1/2: %d %d\n", ulp_pressure & 0xFFFF, ulp_pressure2 & 0xFFFF);
 
-    int oversampling= 3;
+    int oversampling= 1;
 
     int32_t UP= ((((ulp_pressure & 0xFFFF) << 8) | (ulp_pressure2 & 0xFFFF)) >> (8-oversampling));
     int32_t B3, B5, B6, X1, X2, X3, p;
@@ -107,7 +107,7 @@ static void print_status()
     B5 = computeB5(ulp_temp & 0xFFFF);
     temp = (B5+8) >> 4;
     temp /= 10;
-    printf("\nTemperature: %f\n", temp);
+    printf("\nTemperature: %.2f\n", temp);
 
     // do pressure calcs
     B6 = B5 - 4000;
@@ -133,7 +133,7 @@ static void print_status()
 
     p = p + ((X1 + X2 + (int32_t)3791)>>4);
     float pressure = p, altitude_meters= 3;
-    printf("Pressure: %f\n\n", (pressure / pow(1.0-altitude_meters/44330, 5.255))/100.0);
+    printf("Pressure: %.2f\n\n", (pressure / pow(1.0-altitude_meters/44330, 5.255))/100.0);
 }
 
 void app_main()

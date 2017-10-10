@@ -106,7 +106,7 @@ didInit:
 	push r1
 	move r1,BMP180_REG_CONTROL
 	push r1
-	move r1,BMP180_COMMAND_PRESSURE3
+	move r1,BMP180_COMMAND_PRESSURE1
 	push r1
 	psr
 	jump write8
@@ -114,8 +114,8 @@ didInit:
 	move r0,r2 // test for error in r2
 	jumpr fail,1,ge
 
-	// Wait 26ms for sensor computation
-	move r2,26
+	// Wait 8 ms for sensor computation
+	move r2,8
 	psr
 	jump waitMs
 
