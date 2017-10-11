@@ -60,13 +60,15 @@ md: .long 0
 entry:
 	move r3,stackEnd
 
+	move r1,ac1
+	ld r0,r1,0
+	jumpr init,1,lt
+didInit:
 	// Read the BMP-180 every 4 timer cycles:
 	move r1,counter
 	ld r0,r1,0
 	add r0,r0,1
 	st r0,r1,0 // increment counter
-	jumpr init,2,lt
-didInit:
 	and r0,r0,0x3
 	jumpr waitNext,1,ge
 
@@ -182,84 +184,22 @@ doneWaitMs:
 
 // Read calibration data
 init:
+	move r1,ac1
+	push r1
 	move r1,BMP180_ADDR
 	push r1
 	move r1,BMP085_CAL_AC1
 	push r1
+read_cal:
 	psr
 	jump read16
-	move r1,ac1
+	ld r1,r3,12
 	st r0,r1,0
-
-	move r1,BMP085_CAL_AC2
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,ac2
-	st r0,r1,0
-
-	move r1,BMP085_CAL_AC3
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,ac3
-	st r0,r1,0
-
-	move r1,BMP085_CAL_AC4
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,ac4
-	st r0,r1,0
-
-	move r1,BMP085_CAL_AC5
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,ac5
-	st r0,r1,0
-
-	move r1,BMP085_CAL_AC6
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,ac6
-	st r0,r1,0
-
-	move r1,BMP085_CAL_B1
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,b1
-	st r0,r1,0
-
-	move r1,BMP085_CAL_B2
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,b2
-	st r0,r1,0
-
-	move r1,BMP085_CAL_MB
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,mb
-	st r0,r1,0
-
-	move r1,BMP085_CAL_MC
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,mc
-	st r0,r1,0
-
-	move r1,BMP085_CAL_MD
-	st r1,r3,4
-	psr
-	jump read16
-	move r1,md
-	st r0,r1,0
-
-	add r3,r3,2
+	add r1,r1,1
+	st r1,r3,12 // next cal parameter address
+	ld r0,r3,4
+	add r0,r0,2 // next register
+	st r0,r3,4
+	jumpr read_cal,BMP085_CAL_MD+2,lt
+	add r3,r3,3
 	jump didInit
