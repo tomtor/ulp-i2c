@@ -41,8 +41,14 @@ entry:
 	and r0,r0,0x3
 	jumpr waitNext,1,ge
 
+	// GPIO2 LED ON
+	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 12, 1, 1)
+
 	psr
 	jump readBMP
+
+	// GPIO2 LED ON
+	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 12, 1, 0)
 
 	/* wake up after significant change */
 	move r1,pressure
@@ -63,7 +69,7 @@ testTemp:
 	sub r0,r0,r2
 	psr
 	jump abs
-	jumpr waitNext,6,lt
+	jumpr waitNext,10,lt
 
 wakeUp:
 	/* safe new pressure and temp */
