@@ -195,6 +195,10 @@ init:
 read_cal:
 	psr
 	jump read16
+	or r2,r2,0 // test error
+	jump readok,eq
+	jump fail
+readok:
 	ld r1,r3,12
 	st r0,r1,0
 	add r1,r1,1
