@@ -101,7 +101,7 @@ static void print_status()
 
     float temp;
     B5 = computeB5(ulp_temp & 0xFFFF);
-    temp = (B5+8) >> 4;
+    temp = (B5+8) / 16.0;
     temp /= 10;
     printf("\nTemperature: %.2f\n", temp);
 
