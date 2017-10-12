@@ -157,6 +157,8 @@ fail:
 wake_up:
 	/* Wake up the SoC, end program */
 	wake
+	/* Stop the wakeup timer so it does not restart ULP */
+	WRITE_RTC_FIELD(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN, 0)
 
 waitNext:
 	halt
