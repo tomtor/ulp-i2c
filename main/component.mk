@@ -9,6 +9,7 @@ ULP_APP_NAME ?= ulp_$(COMPONENT_NAME)
 #    Files should be placed into a separate directory (in this case, ulp/),
 #    which should not be added to COMPONENT_SRCDIRS.
 ULP_S_SOURCES = $(addprefix $(COMPONENT_PATH)/ulp/, \
+	main.S \
 	i2c-bmp180.S \
 	i2c-util.S \
 	i2c.S \

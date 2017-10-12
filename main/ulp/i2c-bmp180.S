@@ -28,16 +28,6 @@ temp:	.long 0
 pressure: .long 0
 pressure2: .long 0
 
-	.global	counter
-counter: .long 0
-
-	.global stack
-stack:
-	.skip 100
-	.global stackEnd
-stackEnd:
-	.long 0
-
 	.global ac1, ac2, ac3, ac4, ac5, ac6, b1, b2, mb, mc, md
 
 ac1: .long 0
@@ -56,22 +46,13 @@ md: .long 0
 
 	/* Code goes into .text section */
 	.text
-	.global entry
-entry:
-	move r3,stackEnd
 
+.global readBMP
+readBMP:
 	move r1,ac1
 	ld r0,r1,0
-	jumpr init,1,lt
+	jumpr initBMP,1,lt
 didInit:
-	// Read the BMP-180 every 4 timer cycles:
-	move r1,counter
-	ld r0,r1,0
-	add r0,r0,1
-	st r0,r1,0 // increment counter
-	and r0,r0,0x3
-	jumpr waitNext,1,ge
-
 	move r1,BMP180_ADDR
 	push r1
 	move r1,BMP180_REG_CONTROL
@@ -147,30 +128,14 @@ didInit:
 	move r2,pressure2 // store result
 	st r1,r2,0
 
-	jump wake_up
+	ret
 
 fail:
 	move r1,temp
 	move r0,0 // 0 signals error
 	st r0,r1,0
-
-wake_up:
-	/* Wake up the SoC, end program */
-	wake
-	/* Stop the wakeup timer so it does not restart ULP */
-	WRITE_RTC_FIELD(RTC_CNTL_STATE0_REG, RTC_CNTL_ULP_CP_SLP_TIMER_EN, 0)
-
-waitNext:
-	halt
-
-// Wait for r2 milliseconds
-waitMs:
-	wait 8000
-	sub r2,r2,1
-	jump doneWaitMs,eq
-	jump waitMs
-doneWaitMs:
 	ret
+
 
 #define BMP085_CAL_AC1           0xAA
 #define BMP085_CAL_AC2           0xAC
@@ -185,7 +150,7 @@ doneWaitMs:
 #define BMP085_CAL_MD            0xBE
 
 // Read calibration data
-init:
+initBMP:
 	move r1,ac1
 	push r1
 	move r1,BMP180_ADDR
@@ -209,3 +174,12 @@ readok:
 	jumpr read_cal,BMP085_CAL_MD+2,lt
 	add r3,r3,3
 	jump didInit
+
+// Wait for r2 milliseconds
+waitMs:
+	wait 8000
+	sub r2,r2,1
+	jump doneWaitMs,eq
+	jump waitMs
+doneWaitMs:
+	ret
