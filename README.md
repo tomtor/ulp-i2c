@@ -1,7 +1,7 @@
 # ULP I2C demo application
 
-Example of ULP I2C application which reads a sensor (BMP-180) and wakes up the main processors after a significant change
-of measured values.
+Example of ESP-32 ULP I2C application which reads a sensor (BMP-180) and wakes up the main processors after a significant change
+of the measured values.
 
 ## I2C bit banged support
 Note that this example uses a bit-banged I2C implementation, because the hardware ULP I2C support cannot read 16 bit values.
@@ -18,4 +18,8 @@ Wait some milliseconds
 Compute abs value of register
 
 ## Credits
+Parts of the original C code from
+
 https://github.com/adafruit/Adafruit-BMP085-Library
+
+was translated to ESP assembly
