@@ -47,7 +47,7 @@ entry:
 	psr
 	jump readBMP
 
-	// GPIO2 LED ON
+	// GPIO2 LED OFF
 	WRITE_RTC_REG(RTC_GPIO_OUT_REG, RTC_GPIO_OUT_DATA_S + 12, 1, 0)
 
 	/* wake up after significant change */
