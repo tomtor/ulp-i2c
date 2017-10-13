@@ -22,4 +22,4 @@ Parts of the original C code from
 
 https://github.com/adafruit/Adafruit-BMP085-Library
 
-was translated to ESP assembly.
+were translated to ESP assembly.
