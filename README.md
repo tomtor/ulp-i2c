@@ -23,3 +23,10 @@ Parts of the original C code from
 https://github.com/adafruit/Adafruit-BMP085-Library
 
 were translated to ESP assembly.
+
+## Warning
+
+Be aware of an assembler bug:
+
+https://www.esp32.com/viewtopic.php?f=2&t=3228
+ 
