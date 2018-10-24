@@ -72,7 +72,7 @@ testTemp:
 	jumpr waitNext,10,lt
 
 wakeUp:
-	/* safe new pressure and temp */
+	/* save new pressure and temp */
 	move r1,pressure
 	ld r0,r1,0
 	move r1,prev_pressure
