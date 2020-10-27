@@ -149,7 +149,7 @@ void app_main()
     ESP_ERROR_CHECK( esp_sleep_enable_ulp_wakeup() );
 
     /* Start the program */
-    esp_err_t err = ulp_run((&ulp_entry - RTC_SLOW_MEM) / sizeof(uint32_t));
+    esp_err_t err = ulp_run(&ulp_entry - RTC_SLOW_MEM);
     ESP_ERROR_CHECK(err);
 
     esp_deep_sleep_start();
