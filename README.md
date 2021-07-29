@@ -3,6 +3,9 @@
 Example of ESP-32 ULP I2C application which reads a sensor (BMP-180) and wakes up the main processors after a significant change
 of the measured values.
 
+Note that the ULP is quite limited in program size and IO options.
+An alternative is to use an ATTiny as ULP processor, see https://github.com/tomtor/ESPTiny
+
 ## IDF requirements
 Tested on IDF 4.1 with CMake build system
 
